@@ -1,4 +1,3 @@
-version: '3'
 services:
   ros:
     build: .
@@ -17,6 +16,14 @@ services:
       - novnc.env
     ports:
       - "8080:8080"
+    networks:
+      - x11
+  rosbot:
+    image: husarion/rosbot-gazebo:humble
+    container_name: rosbot-gazebo
+    environment:
+      - DISPLAY=novnc:0.0
+    command: ros2 launch rosbot_gazebo simulation.launch.py mecanum:=${MECANUM:-False}
     networks:
       - x11
 networks:
