@@ -46,7 +46,7 @@ Afterwards, in the terminal open for step 1., press ctrl+c. Once terminated, you
 At this point, both terminals can be closed if you wish.
 
 ## Editing your workspace
-The workspace folder that gets created on your machine by `docker-compose` is where you can write and edit your packages. It maps to `~/catkin_ws` on the Docker container. However, if you want to run `catkin_make`, do so by creating a bash via `docker-compose exec ros bash` and running `catkin_make` in `/catkin_ws`.
+The `workspace` folder created on your machine by `docker compose` is where you can write and edit your packages. That folder maps to `~/catkin_ws` on the Docker container and is shared between the host machine and the Docker container. 
 
 ## Installing other packages
 Edit the `Dockerfile` line that installs packages and rebuild the container using `docker compose build`.
