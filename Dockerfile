@@ -14,7 +14,8 @@ RUN apt-get -y update && apt-get install -y \
     htop \
     ros-${ROS_DISTRO}-ros-gz \
     ros-${ROS_DISTRO}-tf-transformations \
-    ros-${ROS_DISTRO}-tf2-py
+    ros-${ROS_DISTRO}-tf2-py \
+    ros-${ROS_DISTRO}-turtlebot3-simulations
 RUN mkdir -p /root/catkin_ws/src
 WORKDIR /root/catkin_ws
 RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash"
