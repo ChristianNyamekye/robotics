@@ -27,9 +27,10 @@ To see whether you can visualize the desktop of the running docker
 1. Open your browser to `localhost:8080/vnc.html` and click connect.
 
 open another terminal to run the simulation:
+
 3. Run `docker compose exec ros bash` (`docker compose up` has to be running)
 4. Run `source /opt/ros/humble/setup.bash`
-5. ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+5. Run `ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py`
 
 open another terminal to contrl the robot via keyboard:
 
