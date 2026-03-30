@@ -16,14 +16,17 @@ Open a **Terminal** (Mac) or **PowerShell** (Windows) and follow these steps in 
 
 ### A. Clone the Repository
 ```bash
-git clone [https://github.com/quattrinili/vnc-ros](https://github.com/quattrinili/vnc-ros)
+git clone https://github.com/quattrinili/vnc-ros
 cd vnc-ros
 ```
 
-### B. Create a Local Workspace
-Create a folder called `workspace`. This folder on your host machine is shared with the Docker container; this is where you will write and edit your ROS packages. **This step must be completed before running the container.**
+### B. Ensure Local Workspace Exists
+The local `ros2_ws/src` folder is shared with the Docker container at `/root/ros2_ws/src` and is where you will write and edit your ROS packages.
+
+If `ros2_ws/src` is already in the repository, you can skip this step.
+If it is missing, create it with:
 ```bash
-mkdir workspace
+mkdir -p ros2_ws/src
 ```
 
 ### C. Launch the Containers
@@ -47,9 +50,14 @@ Once the terminal shows the following type of messages and remains running witho
 Open a **new (second) terminal window** on your host machine and run:
 1. **Enter the ROS container:**
    ```bash
+   cd vnc-ros
    docker compose exec ros bash
    ```
-2. **Launch the world:**
+2. **Load the ROS environment:**
+   ```bash
+   source /opt/ros/humble/setup.bash
+   ```
+3. **Launch the world:**
    ```bash
    ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
    ```
@@ -59,9 +67,14 @@ Open a **new (second) terminal window** on your host machine and run:
 Open a **third terminal window** on your host machine and run:
 1. **Enter the ROS container:**
    ```bash
+   cd vnc-ros
    docker compose exec ros bash
    ```
-2. **Run the teleop node:**
+2. **Load the ROS environment:**
+   ```bash
+   source /opt/ros/humble/setup.bash
+   ```
+3. **Run the teleop node:**
    ```bash
    ros2 run teleop_twist_keyboard teleop_twist_keyboard
    ```
@@ -86,7 +99,7 @@ To properly stop the environment and clean up:
 ## Development Notes
 
 ### Editing your Workspace
-The `workspace` folder you created on your machine is dynamically mapped to the Docker container. You can use your favorite IDE (e.g., VS Code) on your host machine to edit your packages within this folder. Changes made locally will appear immediately inside the container at `~/ros2_ws` (or your configured workspace path).
+The `ros2_ws/src` folder on your machine is dynamically mapped to `/root/ros2_ws/src` inside the Docker container. You can use your favorite IDE (e.g., VS Code) on your host machine to edit your packages within this folder.
 
 ### Installing Additional Packages
 To add new dependencies to the environment:

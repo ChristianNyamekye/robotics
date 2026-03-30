@@ -3,7 +3,7 @@ services:
     build: .
     command: tail -f /dev/null
     volumes: 
-      - ./workspace:/root/catkin_ws/
+      - ./ros2_ws/src:/root/ros2_ws/src
     environment:
       - DISPLAY=novnc:0.0
     env_file:
