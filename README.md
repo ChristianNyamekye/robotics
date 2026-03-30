@@ -57,6 +57,7 @@ Open a **new (second) terminal window** on your host machine and run:
    ```bash
    source /opt/ros/humble/setup.bash
    ```
+   *(This is already added in `.bashrc`, but we run it explicitly for clarity and reliability.)*
 3. **Launch the world:**
    ```bash
    ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
