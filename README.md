@@ -1,55 +1,73 @@
 # ROS on Mac/Windows
 
-Before following the next two steps, install Docker ([installation instructions for Mac](https://docs.docker.com/docker-for-mac/install/) or [for Windows](https://docs.docker.com/docker-for-windows/install/#system-requirements-for-wsl-2-backend)).
+Use this guide to run a TurtleBot3 Gazebo simulation in Docker on macOS or Windows.
 
-## 1. Setup
-Open a new terminal in the Mac or PowerShell in Windows.
-1. Once the terminal is open, clone this repository with the command `git clone https://github.com/quattrinili/vnc-ros`
-2. Enter in the cloned repository folder, `cd vnc-ros`
-3. Create a folder called `workspace` with the command `mkdir workspace`
-4. Run `docker compose up`
+## Prerequisites
+Install Docker Desktop first:
+- macOS: [Install Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/)
+- Windows: [Install Docker Desktop for Windows (WSL2 backend)](https://docs.docker.com/docker-for-windows/install/#system-requirements-for-wsl-2-backend)
 
-(`ros.env` contains environment variables for ROS that can be modified before running the command in step 3.)
+## 1. Start the containers
+Open a terminal (macOS Terminal or Windows PowerShell) and run:
 
-## 2. Running a ROS gazebo simulation for testing
-Once the other terminal shows the following type of messages and remains running without errors
+```bash
+git clone https://github.com/quattrinili/vnc-ros
+cd vnc-ros
+mkdir -p workspace
+docker compose up
+```
 
-     ⠿ Container vnc-ros-ros-1    Cr...                           0.0s
-     ⠿ Container vnc-ros-novnc-1  Recreated                       0.1s
-    Attaching to vnc-ros-novnc-1, vnc-ros-ros-1
-    ... (comment: more messages, with the latest being in the current version of Docker)
+Keep this terminal open. It should stay busy and show container logs.
 
-    vnc-ros-novnc-1  | 2023-03-29 19:45:10,919 INFO success: xterm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+Notes:
+- `ros.env` contains ROS-related environment variables you can adjust before running `docker compose up`.
+- Log messages may vary. If there are no errors and the command keeps running, continue.
 
-(Note that there might be some slight variations of outputs, as long as the terminal is "occupied" by that command, you can go to the next step)
+## 2. Open the desktop in your browser
+1. Open your browser and go to `http://localhost:8080/vnc.html`.
+2. Click `Connect`.
 
-To see whether you can visualize the desktop of the running docker
-1. Open your browser to `localhost:8080/vnc.html` and click connect.
+You should see the container desktop.
 
-open another terminal to run the simulation:
+## 3. Start the Gazebo simulation
+Open a second terminal and run:
 
-3. Run `docker compose exec ros bash` (`docker compose up` has to be running)
-4. Run `source /opt/ros/humble/setup.bash`
-5. Run `ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py`
+```bash
+cd vnc-ros
+docker compose exec ros bash
+source /opt/ros/humble/setup.bash
+ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+```
 
-open another terminal to contrl the robot via keyboard:
+Keep this second terminal open while Gazebo is running.
 
-5. Run `ros2 run teleop_twist_keyboard teleop_twist_keyboard` and you should see a some terminal output indicating how to use the keyboard to teleoperate the robot. You can see the robot moving in the web page opened in the browser following the steps above.
+## 4. Control the robot with your keyboard
+Open a third terminal and run:
 
+```bash
+cd vnc-ros
+docker compose exec ros bash
+source /opt/ros/humble/setup.bash
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
+```
 
-## 3. To terminate
+Use the keys shown in the terminal to move the robot. You should see movement in the browser window.
 
-In the terminals open for steps 3. and 5., press ctrl+c, which will stop the execution of the simulator and teleoperation. Once that is stopped -- you should see it as the terminal can accept commands -- press ctrl+d to exit the Docker container.
+## 5. Stop everything cleanly
+1. In terminal 3 (keyboard control), press `Ctrl+C`, then type `exit`.
+2. In terminal 2 (Gazebo), press `Ctrl+C`, then type `exit`.
+3. In terminal 1 (`docker compose up`), press `Ctrl+C` to stop the containers.
 
-Afterwards, in the terminal open for step 1., press ctrl+c. Once terminated, you should see the following messages
-
-    Stopping mac-ros_ros_1   ... done
-    Stopping mac-ros_novnc_1 ... done
-
-At this point, both terminals can be closed if you wish.
+After that, you can close all terminals.
 
 ## Editing your workspace
-The `workspace` folder created on your machine by `docker compose` is where you can write and edit your packages. That folder maps to `~/catkin_ws` on the Docker container and is shared between the host machine and the Docker container. 
+The local `workspace` folder is where you can create and edit your ROS packages.
+It is mounted inside the container at `~/catkin_ws`, so changes are shared between your host machine and the container.
 
-## Installing other packages
-Edit the `Dockerfile` line that installs packages and rebuild the container using `docker compose build`.
+## Installing additional packages
+1. Edit the package install line in `Dockerfile`.
+2. Rebuild the image:
+
+```bash
+docker compose build
+```
