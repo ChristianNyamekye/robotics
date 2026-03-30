@@ -49,11 +49,7 @@ Open a **new (second) terminal window** on your host machine and run:
    ```bash
    docker compose exec ros bash
    ```
-2. **Initialize the environment:**
-   ```bash
-   source /opt/ros/humble/setup.bash
-   ```
-3. **Launch the world:**
+2. **Launch the world:**
    ```bash
    ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
    ```
