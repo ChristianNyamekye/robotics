@@ -16,10 +16,10 @@ RUN apt-get -y update && apt-get install -y \
     ros-${ROS_DISTRO}-tf-transformations \
     ros-${ROS_DISTRO}-tf2-py \
     ros-${ROS_DISTRO}-turtlebot3-simulations
-RUN mkdir -p /root/catkin_ws/src
-WORKDIR /root/catkin_ws
+RUN mkdir -p /root/ros2_ws/src
+WORKDIR /root/ros2_ws
 RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash"
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /root/.bashrc
 RUN echo "defshell -bash" >> ~/.screenrc
-RUN echo "source /root/catkin_ws/install/setup.bash" >> /root/.bashrc
-WORKDIR /root/catkin_ws/src
+RUN echo "source /root/ros2_ws/install/setup.bash" >> /root/.bashrc
+WORKDIR /root/ros2_ws/src
