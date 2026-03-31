@@ -2,7 +2,9 @@
 
 # Author: Alberto Quattrini Li
 # Date: 2026-03-30
-# Description: Example node to move forward for a fixed duration, with laser scan subscription.
+# Description: Example node to move forward for a fixed duration using a timer callback.
+# Teaching note: This file shows the recommended ROS 2 timer pattern for repeated publishing.
+# Note: Use timer callbacks in later labs.
 # Acknowledgments: Code formatting and comment cleanup assisted by GitHub Copilot.
 
 # Import of relevant libraries.
@@ -52,35 +54,42 @@ class GoForward(Node):
         # Other variables.
         self.linear_velocity = linear_velocity # Constant linear velocity set.
         self.latest_scan = None
+        self._motion_duration = None
+        self._motion_start_time = None
+        self._motion_timer = None
+        self.motion_done = False
 
-    def move_forward(self, duration):
-        """Function to move_forward for a given duration."""
+    def start_motion_with_timer(self, duration):
+        """Move forward for a given duration using a ROS timer callback."""
         if duration <= 0.0:
             self.get_logger().warn('Duration must be > 0. Nothing to do.')
-            return
+            return False
 
         self._wait_for_sim_ready(STARTUP_TIMEOUT)
 
-        self.get_logger().info('Starting forward motion...')
+        self._motion_duration = Duration(seconds=duration)
+        self._motion_start_time = self.get_clock().now()
+        self.motion_done = False
+        self._motion_timer = self.create_timer(1.0 / FREQUENCY, self._motion_timer_callback)
 
-        duration = Duration(seconds=duration)
-        rclpy.spin_once(self)
-        start_time = self.get_clock().now()
+        self.get_logger().info('Starting forward motion with timer callback...')
+        return True
 
-        # Loop.
-        while rclpy.ok():
-            # Process subscriptions while pacing this control loop.
-            rclpy.spin_once(self, timeout_sec=1.0 / FREQUENCY)
-            # Check if traveled of given distance based on time.
-            if self.get_clock().now() - start_time >= duration:
-                break
+    def _motion_timer_callback(self):
+        """Publish forward commands until the requested duration has elapsed."""
+        if self._motion_start_time is None or self._motion_duration is None:
+            return
 
-            # Publish message.
-            self._publish_velocity(self.linear_velocity, 0.0)
+        if self.get_clock().now() - self._motion_start_time >= self._motion_duration:
+            self.stop()
+            if self._motion_timer is not None:
+                self.destroy_timer(self._motion_timer)
+                self._motion_timer = None
+            self.motion_done = True
+            self.get_logger().info('Motion completed.')
+            return
 
-        # Traveled the required distance, stop.
-        self.stop()
-        self.get_logger().info('Motion completed.')
+        self._publish_velocity(self.linear_velocity, 0.0)
 
     def _wait_for_sim_ready(self, timeout_sec):
         """Wait until simulation clock and cmd_vel subscriber are ready."""
@@ -119,6 +128,8 @@ class GoForward(Node):
 
     def stop_and_flush(self, repeats=3, timeout_sec=0.05):
         """Publish stop commands and briefly spin to increase delivery reliability."""
+        if not rclpy.ok():
+            return
         for _ in range(repeats):
             self.stop()
             rclpy.spin_once(self, timeout_sec=timeout_sec)
@@ -139,9 +150,13 @@ def main(args=None):
 
     go_forward = GoForward()
     try:
-        go_forward.move_forward(DURATION)
+        if go_forward.start_motion_with_timer(DURATION):
+            # Keep processing callbacks until the timer-based motion finishes.
+            while rclpy.ok() and not go_forward.motion_done:
+                rclpy.spin_once(go_forward, timeout_sec=0.1)
     except KeyboardInterrupt:
-        go_forward.get_logger().info('Ctrl+C received. Sending stop command...')
+        if rclpy.ok():
+            go_forward.get_logger().info('Ctrl+C received. Sending stop command...')
         go_forward.stop_and_flush()
     finally:
         # Ensure a final zero-velocity command is attempted before teardown.
