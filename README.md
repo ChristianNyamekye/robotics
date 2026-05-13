@@ -1,111 +1,74 @@
-# ROS 2 Development Environment (Mac & Windows)
+# Robotics — COSC 81/281 Programming Assignments
 
-This repository provides a containerized **ROS 2 Humble** environment with a virtual desktop (NoVNC) accessible via your web browser. This setup allows you to run GUI-based robotics tools like Gazebo and Rviz without needing a native Linux installation.
+Christian Nyamekye · Spring 2026 · Dartmouth
 
-## Prerequisites
+ROS 2 Humble assignments for *Principles of Robot Design and Programming*. Each `paN/` folder under `ros2_ws/src/` is self-contained: code, README, report, and demo recording. The repo also ships the Docker-based dev environment forked from the course template.
 
-Before following the instructions below, you must install **Docker Desktop**:
-* [Download for Mac](https://docs.docker.com/desktop/install/mac-install/)
-* [Download for Windows](https://docs.docker.com/desktop/install/windows-install/) (Ensure the **WSL 2 backend** is enabled in settings).
+## Assignments
 
----
+| PA | Topic | Folder |
+|---|---|---|
+| 0 | Random walk on TurtleBot3 | [`ros2_ws/src/pa0`](ros2_ws/src/pa0) |
+| 1 | Shape-drawing kinematic controller (trapezoid / D / polygon) | [`ros2_ws/src/pa1`](ros2_ws/src/pa1) |
+| 2 | Reactive wall-follower on Stage rosbot | [`ros2_ws/src/pa2`](ros2_ws/src/pa2) |
+| 3 | A\* / wavefront path planner on a maze | [`ros2_ws/src/pa3`](ros2_ws/src/pa3) |
+| 4 | Occupancy grid mapping with log-odds | [`ros2_ws/src/pa4`](ros2_ws/src/pa4) |
 
-## 1. Setup
+Each folder has its own README with run instructions and a `report.pdf`. Demos are `demo.mp4` in the same folder.
 
-Open a **Terminal** (Mac) or **PowerShell** (Windows) and follow these steps in order:
+## Environment
 
-### A. Clone the Repository
+Docker + noVNC, so the ROS 2 Humble stack and GUI tools (Stage, RViz, Gazebo) run in a Linux container viewable through a browser tab. Works the same on macOS and Windows.
+
+### Prerequisites
+
+[Docker Desktop](https://docs.docker.com/desktop/) installed and running. On Windows enable the WSL 2 backend.
+
+### Bring up
+
 ```bash
-git clone https://github.com/quattrinili/vnc-ros
-cd vnc-ros
+git clone https://github.com/ChristianNyamekye/robotics
+cd robotics
+docker compose up -d
 ```
 
-### B. Ensure Local Workspace Exists
-The local `ros2_ws/src` folder is shared with the Docker container at `/root/ros2_ws/src` and is where you will write and edit your ROS packages.
+Open <http://localhost:8080/vnc.html?autoconnect=true&resize=remote> in a browser for the GUI desktop.
 
-If `ros2_ws/src` is already in the repository, you can skip this step.
-If it is missing, create it with:
+### Enter the container
+
 ```bash
-mkdir -p ros2_ws/src
+docker exec -it vnc-ros-ros-1 bash
+source /opt/ros/humble/setup.bash
+source /root/ros2_ws/install/setup.bash
 ```
 
-### C. Launch the Containers
+Then `cd /root/ros2_ws/src/paN` and follow that PA's README.
+
+### Tear down
+
 ```bash
-docker compose up
+docker compose down
 ```
-*(Note: `ros.env` contains environment variables for ROS that can be modified before running this command.)*
 
----
+## Repo layout
 
-## 2. Running a ROS Gazebo Simulation
+```
+robotics/
+├── Dockerfile              # ROS 2 Humble + Stage + tools
+├── docker-compose.yml      # ros + novnc services, mounts ros2_ws/src
+├── ros.env / novnc.env     # container env vars
+├── ros2_ws/src/
+│   ├── pa0/                # random walk
+│   ├── pa1/                # shape drawer
+│   ├── pa2/                # wall follower
+│   ├── pa3/                # path planner
+│   ├── pa4/                # occupancy mapper
+│   └── lec02_example_go_forward.py
+└── README.md               # this file
+```
 
-Once the terminal shows the following type of messages and remains running without errors:
-`vnc-ros-novnc-1 | ... INFO success: xterm entered RUNNING state`
+`ros2_ws/src/Stage/` and `stage_ros2/` are upstream vendored packages and are gitignored — they're built fresh from the Dockerfile.
 
-### A. Access the Visual Desktop
-1. Open your web browser and navigate to: [http://localhost:8080/vnc.html](http://localhost:8080/vnc.html)
-2. Click **Connect**. You should see a Linux desktop environment.
+## Credits
 
-### B. Launch the Simulation
-Open a **new (second) terminal window** on your host machine and run:
-1. **Enter the ROS container:**
-   ```bash
-   cd vnc-ros
-   docker compose exec ros bash
-   ```
-2. **Load the ROS environment:**
-   ```bash
-   source /opt/ros/humble/setup.bash
-   ```
-   *(This is already added in `.bashrc`, but we run it explicitly for clarity and reliability.)*
-3. **Launch the world:**
-   ```bash
-   ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
-   ```
-   *You can now see the robot in the web page opened in Step A.*
-
-### C. Teleoperate the Robot
-Open a **third terminal window** on your host machine and run:
-1. **Enter the ROS container:**
-   ```bash
-   cd vnc-ros
-   docker compose exec ros bash
-   ```
-2. **Load the ROS environment:**
-   ```bash
-   source /opt/ros/humble/setup.bash
-   ```
-3. **Run the teleop node:**
-   ```bash
-   ros2 run teleop_twist_keyboard teleop_twist_keyboard
-   ```
-   *Follow the on-screen instructions to drive the robot using your keyboard. Watch the robot move in your browser window.*
-
----
-
-## 3. Termination
-
-To properly stop the environment and clean up:
-
-1. In the **Simulation** and **Teleop** terminals: Press `Ctrl+C` to stop the active nodes, then type `exit` (or press `Ctrl+D`) to leave the container.
-2. In the **original terminal** (where `docker compose up` is running): Press `Ctrl+C`. You should see output indicating the containers are stopping:
-   ```text
-   Stopping vnc-ros-ros-1   ... done
-   Stopping vnc-ros-novnc-1 ... done
-   ```
-3. Once terminated, all terminal windows can be closed.
-
----
-
-## Development Notes
-
-### Editing your Workspace
-The `ros2_ws/src` folder on your machine is dynamically mapped to `/root/ros2_ws/src` inside the Docker container. You can use your favorite IDE (e.g., VS Code) on your host machine to edit your packages within this folder.
-
-### Installing Additional Packages
-To add new dependencies to the environment:
-1. Edit the `Dockerfile` line that installs packages (`apt-get install`).
-2. Rebuild the container using the following command before running `docker compose up`:
-   ```bash
-   docker compose build
-   ```
+Course infrastructure forked from [quattrinili/vnc-ros](https://github.com/quattrinili/vnc-ros) (Prof. Alberto Quattrini Li, Dartmouth Computer Science). All assignment code and write-ups are my own.

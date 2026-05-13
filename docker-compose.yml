@@ -1,7 +1,7 @@
 services:
   ros:
     build: .
-    command: tail -f /dev/null
+    command: sleep infinity
     volumes: 
       - ./ros2_ws/src:/root/ros2_ws/src
     environment:

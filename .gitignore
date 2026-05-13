@@ -1,1 +1,30 @@
+# ROS 2 workspace build artifacts
 workspace/
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+
+# Upstream vendored packages (built locally from Dockerfile; don't ship)
+ros2_ws/src/Stage/
+ros2_ws/src/stage_ros2/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Large generated artefacts you might keep locally but not push
+*.bag
+*.bag.active
+*.db3

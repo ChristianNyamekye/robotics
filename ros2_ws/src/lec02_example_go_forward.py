@@ -21,7 +21,7 @@ import time
 # Constants.
 FREQUENCY = 10 #Hz.
 LINEAR_VELOCITY = 0.125 #m/s
-DURATION = 8.0 #s how long the message should be published.
+DURATION = 4.0 #s how long the message should be published.
 DEFAULT_CMD_VEL_TOPIC = 'cmd_vel'
 DEFAULT_SCAN_TOPIC = 'scan'
 USE_SIM_TIME = True
